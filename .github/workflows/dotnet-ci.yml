@@ -25,9 +25,36 @@ jobs:
           dotnet restore
           dotnet test --verbosity normal
 
+  update-version:
+    name: Update version in .csproj
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      - name: Update .csproj files
+        run: |
+          sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.get_version.outputs.version }}<\/Version>/g" MyFirstCI.Api/MyFirstCI.Api.csproj
+          sed -i "s/<Version>.*<\/Version>/<Version>${{ steps.get_version.outputs.version }}<\/Version>/g" MyFirstCI.Tests/MyFirstCI.Tests.csproj
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add MyFirstCI.Api/MyFirstCI.Api.csproj MyFirstCI.Tests/MyFirstCI.Tests.csproj
+          git commit -m "Update version to ${{ steps.get_version.outputs.version }} [skip ci]" || echo "No changes to commit"
+          git push
+
   build-and-push:
     name: Build and Push Docker Image
-    needs: test
+    needs: [test, update-version]
     runs-on: ubuntu-latest
     permissions:
       contents: read
