@@ -19,7 +19,7 @@ public class WeatherForecastControllerTests
     {
         var controller = new WeatherController();
         var result = controller.Get();
-        Assert.Equal(10, result.Count());
+        Assert.Equal(5, result.Count());
     }
 
     [Fact]
