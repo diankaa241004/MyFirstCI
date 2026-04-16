@@ -1,4 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine($"Application started in {builder.Environment.EnvironmentName} environment");
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
